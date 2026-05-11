@@ -15,7 +15,6 @@ media_type_aliases = {
     'ndjson': 'jsonl',
     'alac': 'm4a',
     'aif': 'aiff',
-    'aa3': 'oma',
     'tif': 'tiff',
     'toons': 'toon',
     'htm': 'html',

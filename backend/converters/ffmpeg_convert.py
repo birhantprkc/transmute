@@ -34,11 +34,12 @@ class FFmpegConverter(ConverterInterface):
     _decode_only_formats: set = {
         'fli',
         'flc',
-        # Sony OpenMG / ATRAC3 audio container (.oma, also .aa3 via alias).
+        # Sony OpenMG / ATRAC3 audio container (.oma, also .aa3).
         # FFmpeg ships ATRAC3 decoders but no encoder in standard builds, so
         # .oma files can be converted out to other audio formats but cannot
         # be produced. DRM-protected OpenMG files are not supported.
         'oma',
+        'aa3',
     }
     audio_formats: set = {
         'mp3',
@@ -58,6 +59,7 @@ class FFmpegConverter(ConverterInterface):
         'oga',
         'mka',
         'oma',
+        'aa3',
     }
     formats_with_qualities = {
         'mp4', 'avi', 'mov', 'mkv', 'webm', 'ts', '3gp', 'ogv', 'f4v',
