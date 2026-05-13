@@ -9,6 +9,7 @@ import pl from './pl.json'
 import it from './it.json'
 import da from './da.json'
 import fr from './fr.json'
+import hi from './hi.json'
 
 const isTest = typeof process !== 'undefined' && process.env.NODE_ENV === 'test'
 
@@ -24,6 +25,7 @@ i18n
       it: { translation: it },
       da: { translation: da },
       fr: { translation: fr },
+      hi: { translation: hi },
     },
     fallbackLng: 'en',
     interpolation: {
