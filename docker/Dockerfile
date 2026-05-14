@@ -133,15 +133,17 @@ RUN rm -rf /app/backend/tests
 # Copy built frontend from builder stage
 COPY --from=frontend-builder /app/frontend/dist ./frontend/dist
 
-# Copy entrypoint script
-COPY docker/entrypoint.sh /app/entrypoint.sh
-RUN chmod +x /app/entrypoint.sh
+# Copy entrypoint script with executable permission
+COPY --chmod=755 docker/entrypoint.sh /app/entrypoint.sh
+
+# Ensure copied application files are always traversable/readable regardless of host umask.
+RUN chmod -R a+rX /app/backend /app/frontend
 
 # Expose port
 EXPOSE 3313
 
 # Start the application
-ENTRYPOINT ["/app/entrypoint.sh"]
+ENTRYPOINT ["/bin/bash", "/app/entrypoint.sh"]
 
 # Image metadata (OCI labels)
 ARG BUILD_DATE=""
