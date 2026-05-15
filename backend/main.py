@@ -1,4 +1,5 @@
 from contextlib import asynccontextmanager
+import logging
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
@@ -13,6 +14,8 @@ from background import (
     recover_running_jobs,
 )
 import uvicorn
+
+logger = logging.getLogger(__name__)
 
 
 def build_api_description(app_name: str) -> str:
@@ -115,9 +118,22 @@ def create_app() -> FastAPI:
     
     return app
 
+
+def run_api_server(app: FastAPI, settings) -> None:
+    if settings.has_host_override_conflict():
+        logger.warning("Both host and hosts are configured. Using hosts and ignoring host.")
+
+    uvicorn.run(
+        app,
+        host=settings.resolved_bind_host(),
+        port=settings.port,
+        log_config=build_logging_config(),
+    )
+
+
 if __name__ == "__main__":
     settings = get_settings()
     app = create_app()
     cleanup_thread = get_upload_cleanup_thread()
     cleanup_thread.start()
-    uvicorn.run(app, host=settings.host, port=settings.port, log_config=build_logging_config())
+    run_api_server(app, settings)

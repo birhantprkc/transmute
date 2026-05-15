@@ -1,3 +1,4 @@
+import json
 from functools import lru_cache
 from pathlib import Path
 from pydantic import Field, field_validator
@@ -82,6 +83,7 @@ class Settings(BaseSettings):
     # Binding to all interfaces is required as this app should be reachable from
     # other machines besides just localhost
     host: str = "0.0.0.0"  # nosec B104
+    hosts: list[str] | None = None
     port: int = 3313
     api_server_url: str | None = None
 
@@ -96,6 +98,54 @@ class Settings(BaseSettings):
         if len(normalized) >= 2 and normalized[0] == normalized[-1] and normalized[0] in {'"', "'"}:
             normalized = normalized[1:-1].strip()
         return normalized
+
+    @field_validator("hosts", mode="before")
+    @classmethod
+    def _normalize_hosts_env(cls, value):
+        """Normalize host list from CSV or JSON array env forms."""
+        if value is None:
+            return None
+
+        if isinstance(value, str):
+            normalized = value.strip()
+            if not normalized:
+                return None
+
+            if normalized.startswith("["):
+                try:
+                    value = json.loads(normalized)
+                except json.JSONDecodeError as exc:
+                    raise ValueError("hosts must be a CSV string or JSON array of strings") from exc
+            else:
+                value = normalized.split(",")
+
+        if isinstance(value, tuple):
+            value = list(value)
+
+        if not isinstance(value, list):
+            raise ValueError("hosts must be a CSV string or JSON array of strings")
+
+        parsed_hosts: list[str] = []
+        for entry in value:
+            if not isinstance(entry, str):
+                raise ValueError("hosts entries must be strings")
+
+            host = entry.strip()
+            if len(host) >= 2 and host[0] == host[-1] and host[0] in {'"', "'"}:
+                host = host[1:-1].strip()
+
+            if host:
+                parsed_hosts.append(host)
+
+        return parsed_hosts or None
+
+    def resolved_bind_host(self) -> str | list[str]:
+        """Return the uvicorn host argument preserving legacy behavior by default."""
+        return self.hosts if self.hosts else self.host
+
+    def has_host_override_conflict(self) -> bool:
+        """True when host was explicitly set but hosts will take precedence."""
+        return bool(self.hosts) and "host" in self.model_fields_set
 
     def model_post_init(self, __context):
         """Compute derived paths after initialization."""
