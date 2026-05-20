@@ -1,20 +1,21 @@
-from pydantic import BaseModel, Field
 from typing import Literal, Optional
+
+from pydantic import BaseModel, Field
 
 
 class ConversionRequest(BaseModel):
-    id: str = Field(..., example="123e4567-e89b-12d3-a456-426614174000", description="ID of file to convert")
-    quality: Optional[str] = Field(None, example="medium", description="Optional quality setting for conversion (e.g. low, medium, high)")
-    output_format: str = Field(..., example="png", description="Target format for conversion")
+    id: str = Field(..., description="ID of file to convert", json_schema_extra={"example": "123e4567-e89b-12d3-a456-426614174000"})
+    quality: Optional[str] = Field(None, description="Optional quality setting for conversion (e.g. low, medium, high)", json_schema_extra={"example": "medium"})
+    output_format: str = Field(..., description="Target format for conversion", json_schema_extra={"example": "png"})
 
 
 ConversionJobStatus = Literal["queued", "running", "completed", "failed", "cancelled"]
 
 
 class ConversionJobCreateRequest(BaseModel):
-    id: str = Field(..., example="123e4567-e89b-12d3-a456-426614174000", description="ID of the source file to convert")
-    output_format: str = Field(..., example="png", description="Target format for conversion")
-    quality: Optional[str] = Field(None, example="medium", description="Optional quality setting (e.g. low, medium, high)")
+    id: str = Field(..., description="ID of the source file to convert", json_schema_extra={"example": "123e4567-e89b-12d3-a456-426614174000"})
+    output_format: str = Field(..., description="Target format for conversion", json_schema_extra={"example": "png"})
+    quality: Optional[str] = Field(None, description="Optional quality setting (e.g. low, medium, high)", json_schema_extra={"example": "medium"})
 
 
 class ConversionJobResponse(BaseModel):
@@ -43,29 +44,29 @@ class ConversionJobListResponse(BaseModel):
 
 
 class FileMetadata(BaseModel):
-    id: str = Field(..., example="123e4567-e89b-12d3-a456-426614174000")
-    storage_path: str = Field(..., example="data/uploads/6e36aefe-b129-436e-999d-f5037075c017.png")
-    original_filename: str = Field(..., example="example.jpg")
-    media_type: str = Field(..., example="jpg")
-    extension: str = Field(..., example=".jpg")
-    size_bytes: int = Field(..., example=204800)
-    sha256_checksum: str = Field(..., example="abc123def456...")
-    user_id: str = Field(..., example="67118d71-a0c5-443c-80b5-e222bb63bfc2")
-    compatible_formats: dict[str, list[str]] = Field(..., example={"png": [], "gif": [], "webp": ["low", "medium", "high"]}, description="Map of compatible output formats to their available quality options")
+    id: str = Field(..., json_schema_extra={"example": "123e4567-e89b-12d3-a456-426614174000"})
+    storage_path: str = Field(..., json_schema_extra={"example": "data/uploads/6e36aefe-b129-436e-999d-f5037075c017.png"})
+    original_filename: str = Field(..., json_schema_extra={"example": "example.jpg"})
+    media_type: str = Field(..., json_schema_extra={"example": "jpg"})
+    extension: str = Field(..., json_schema_extra={"example": ".jpg"})
+    size_bytes: int = Field(..., json_schema_extra={"example": 204800})
+    sha256_checksum: str = Field(..., json_schema_extra={"example": "abc123def456..."})
+    user_id: str = Field(..., json_schema_extra={"example": "67118d71-a0c5-443c-80b5-e222bb63bfc2"})
+    compatible_formats: dict[str, list[str]] = Field(..., description="Map of compatible output formats to their available quality options", json_schema_extra={"example": {"png": [], "gif": [], "webp": ["low", "medium", "high"]}})
 
 
 class FileMetadataWithFormats(FileMetadata):
-    compatible_formats: dict[str, list[str]] = Field(..., example={"png": [], "gif": [], "webp": ["low", "medium", "high"]}, description="Map of compatible output formats to their available quality options")
+    compatible_formats: dict[str, list[str]] = Field(..., description="Map of compatible output formats to their available quality options", json_schema_extra={"example": {"png": [], "gif": [], "webp": ["low", "medium", "high"]}})
 
 
 class ConversionItem(BaseModel):
-    id: str = Field(..., example="123e4567-e89b-12d3-a456-426614174000")
-    original_filename: str = Field(..., example="example.jpg")
-    media_type: str = Field(..., example="png")
-    extension: str = Field(..., example=".png")
-    size_bytes: int = Field(..., example=204800)
-    sha256_checksum: str = Field(..., example="abc123def456...")
-    quality: Optional[str] = Field(None, example="medium", description="Quality setting used for this conversion")
+    id: str = Field(..., json_schema_extra={"example": "123e4567-e89b-12d3-a456-426614174000"})
+    original_filename: str = Field(..., json_schema_extra={"example": "example.jpg"})
+    media_type: str = Field(..., json_schema_extra={"example": "png"})
+    extension: str = Field(..., json_schema_extra={"example": ".png"})
+    size_bytes: int = Field(..., json_schema_extra={"example": 204800})
+    sha256_checksum: str = Field(..., json_schema_extra={"example": "abc123def456..."})
+    quality: Optional[str] = Field(None, description="Quality setting used for this conversion", json_schema_extra={"example": "medium"})
     original_file: Optional[FileMetadata] = Field(None, description="Original file metadata")
 
 
@@ -73,35 +74,35 @@ class ConversionListResponse(BaseModel):
     conversions: list[ConversionItem] = Field(..., description="List of completed conversions")
 
 class ConverterMetadata(BaseModel):
-    name: str = Field(..., example="drawio_convert")
-    supported_input_formats: list[str] = Field(..., example=["drawio"])
-    supported_output_formats: list[str] = Field(..., example=["png", "pdf", "jpg"])
-    formats_with_qualities: list[str] = Field(..., example=["jpeg"], description="Output formats that support quality options")
-    qualities: list[str] = Field(..., example=["low", "medium", "high"], description="Available quality levels")
+    name: str = Field(..., json_schema_extra={"example": "drawio_convert"})
+    supported_input_formats: list[str] = Field(..., json_schema_extra={"example": ["drawio"]})
+    supported_output_formats: list[str] = Field(..., json_schema_extra={"example": ["png", "pdf", "jpg"]})
+    formats_with_qualities: list[str] = Field(..., description="Output formats that support quality options", json_schema_extra={"example": ["jpeg"]})
+    qualities: list[str] = Field(..., description="Available quality levels", json_schema_extra={"example": ["low", "medium", "high"]})
 
 class ConverterMetadataListResponse(BaseModel):
     converters: list[ConverterMetadata] = Field(..., description="List of the available converters")
 
 class ErrorResponse(BaseModel):
-    detail: str = Field(..., example="No converter found for jpg to png", description="Error message")
+    detail: str = Field(..., description="Error message", json_schema_extra={"example": "No converter found for jpg to png"})
 
 
 class AppInfo(BaseModel):
-    name: str = Field(..., example="Transmute", description="Application name")
-    version: str = Field(..., example="v1.0.0", description="Application version")
+    name: str = Field(..., description="Application name", json_schema_extra={"example": "Transmute"})
+    version: str = Field(..., description="Application version", json_schema_extra={"example": "v1.0.0"})
 
 
 class HealthStatus(BaseModel):
-    status: str = Field(..., example="alive", description="Health status")
+    status: str = Field(..., description="Health status", json_schema_extra={"example": "alive"})
 
 
 class ReadinessChecks(BaseModel):
-    database: str = Field(..., example="ok", description="Database check status")
-    storage: str = Field(..., example="ok", description="Storage check status")
+    database: str = Field(..., description="Database check status", json_schema_extra={"example": "ok"})
+    storage: str = Field(..., description="Storage check status", json_schema_extra={"example": "ok"})
 
 
 class ReadinessResponse(BaseModel):
-    status: str = Field(..., example="ready", description="Overall readiness status")
+    status: str = Field(..., description="Overall readiness status", json_schema_extra={"example": "ready"})
     checks: ReadinessChecks = Field(..., description="Individual component checks")
 
 
@@ -110,25 +111,25 @@ class FileListResponse(BaseModel):
 
 
 class UrlUploadRequest(BaseModel):
-    url: str = Field(..., example="https://example.com/file.pdf", description="Direct URL to a file for Transmute to download")
+    url: str = Field(..., description="Direct URL to a file for Transmute to download", json_schema_extra={"example": "https://example.com/file.pdf"})
 
 
 class FileUploadResponse(BaseModel):
-    message: str = Field(..., example="File uploaded successfully", description="Upload status message")
+    message: str = Field(..., description="Upload status message", json_schema_extra={"example": "File uploaded successfully"})
     metadata: FileMetadataWithFormats = Field(..., description="Uploaded file metadata with compatible formats")
 
 
 class FileUrlUploadResponse(BaseModel):
-    message: str = Field(..., example="File uploaded successfully", description="Upload status message")
+    message: str = Field(..., description="Upload status message", json_schema_extra={"example": "File uploaded successfully"})
     files: list[FileMetadataWithFormats] = Field(..., description="Metadata for every file retrieved from the URL. A single URL may resolve to multiple files (e.g. a playlist).")
 
 
 class FileDeleteResponse(BaseModel):
-    message: str = Field(..., example="File deleted successfully", description="Deletion status message")
+    message: str = Field(..., description="Deletion status message", json_schema_extra={"example": "File deleted successfully"})
 
 
 class BatchDownloadRequest(BaseModel):
-    file_ids: list[str] = Field(..., example=["123e4567-e89b-12d3-a456-426614174000", "987fcdeb-51a2-43f1-b789-123456789abc"], description="List of converted file IDs to download")
+    file_ids: list[str] = Field(..., description="List of converted file IDs to download", json_schema_extra={"example": ["123e4567-e89b-12d3-a456-426614174000", "987fcdeb-51a2-43f1-b789-123456789abc"]})
 
 
 ThemeValue = Literal["rubedo", "citrinitas", "viriditas", "nigredo", "albedo", "aurora", "caelum", "argentum"]
@@ -136,19 +137,19 @@ UserRoleValue = Literal["admin", "member", "guest"]
 
 
 class AppSettingsResponse(BaseModel):
-    theme: str = Field(..., example="rubedo", description="Active UI theme key (built-in or custom)")
-    auto_download: bool = Field(..., example=False, description="Auto-download converted files on completion")
-    keep_originals: bool = Field(..., example=True, description="Retain uploaded source files after conversion")
-    cleanup_enabled: bool = Field(..., example=True, description="Enable automatic cleanup of old files")
-    cleanup_ttl_minutes: int = Field(..., example=60, description="Time-to-live in minutes for cleanup")
+    theme: str = Field(..., description="Active UI theme key (built-in or custom)", json_schema_extra={"example": "rubedo"})
+    auto_download: bool = Field(..., description="Auto-download converted files on completion", json_schema_extra={"example": False})
+    keep_originals: bool = Field(..., description="Retain uploaded source files after conversion", json_schema_extra={"example": True})
+    cleanup_enabled: bool = Field(..., description="Enable automatic cleanup of old files", json_schema_extra={"example": True})
+    cleanup_ttl_minutes: int = Field(..., description="Time-to-live in minutes for cleanup", json_schema_extra={"example": 60})
 
 
 class AppSettingsUpdate(BaseModel):
-    theme: Optional[str] = Field(None, example="rubedo", description="Theme key to apply (built-in or custom)")
-    auto_download: Optional[bool] = Field(None, example=False, description="Auto-download on completion")
-    keep_originals: Optional[bool] = Field(None, example=True, description="Keep original files after conversion")
-    cleanup_enabled: Optional[bool] = Field(None, example=True, description="Enable automatic cleanup of old files")
-    cleanup_ttl_minutes: Optional[int] = Field(None, example=60, description="Time-to-live in minutes for cleanup")
+    theme: Optional[str] = Field(None, description="Theme key to apply (built-in or custom)", json_schema_extra={"example": "rubedo"})
+    auto_download: Optional[bool] = Field(None, description="Auto-download on completion", json_schema_extra={"example": False})
+    keep_originals: Optional[bool] = Field(None, description="Keep original files after conversion", json_schema_extra={"example": True})
+    cleanup_enabled: Optional[bool] = Field(None, description="Enable automatic cleanup of old files", json_schema_extra={"example": True})
+    cleanup_ttl_minutes: Optional[int] = Field(None, description="Time-to-live in minutes for cleanup", json_schema_extra={"example": 60})
 
 
 # Hex color regex: #rgb or #rrggbb
@@ -156,22 +157,22 @@ _HEX_COLOR_PATTERN = r"^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$"
 
 
 class CustomThemeColors(BaseModel):
-    primary:       str = Field(..., example="#ef4444", pattern=_HEX_COLOR_PATTERN, description="Primary brand color")
-    primary_light: str = Field(..., example="#f87171", pattern=_HEX_COLOR_PATTERN, description="Lighter primary variant")
-    primary_dark:  str = Field(..., example="#b91c1c", pattern=_HEX_COLOR_PATTERN, description="Darker primary variant")
-    accent:        str = Field(..., example="#f59e0b", pattern=_HEX_COLOR_PATTERN, description="Accent color")
-    success:       str = Field(..., example="#22c55e", pattern=_HEX_COLOR_PATTERN, description="Success color")
-    success_light: str = Field(..., example="#4ade80", pattern=_HEX_COLOR_PATTERN, description="Lighter success variant")
-    success_dark:  str = Field(..., example="#15803d", pattern=_HEX_COLOR_PATTERN, description="Darker success variant")
-    surface_dark:  str = Field(..., example="#0f172a", pattern=_HEX_COLOR_PATTERN, description="Dark surface background")
-    surface_light: str = Field(..., example="#1e293b", pattern=_HEX_COLOR_PATTERN, description="Light surface background")
-    text:          str = Field(..., example="#f8fafc", pattern=_HEX_COLOR_PATTERN, description="Primary text color")
-    text_muted:    str = Field(..., example="#cbd5e1", pattern=_HEX_COLOR_PATTERN, description="Muted text color")
+    primary:       str = Field(..., pattern=_HEX_COLOR_PATTERN, description="Primary brand color", json_schema_extra={"example": "#ef4444"})
+    primary_light: str = Field(..., pattern=_HEX_COLOR_PATTERN, description="Lighter primary variant", json_schema_extra={"example": "#f87171"})
+    primary_dark:  str = Field(..., pattern=_HEX_COLOR_PATTERN, description="Darker primary variant", json_schema_extra={"example": "#b91c1c"})
+    accent:        str = Field(..., pattern=_HEX_COLOR_PATTERN, description="Accent color", json_schema_extra={"example": "#f59e0b"})
+    success:       str = Field(..., pattern=_HEX_COLOR_PATTERN, description="Success color", json_schema_extra={"example": "#22c55e"})
+    success_light: str = Field(..., pattern=_HEX_COLOR_PATTERN, description="Lighter success variant", json_schema_extra={"example": "#4ade80"})
+    success_dark:  str = Field(..., pattern=_HEX_COLOR_PATTERN, description="Darker success variant", json_schema_extra={"example": "#15803d"})
+    surface_dark:  str = Field(..., pattern=_HEX_COLOR_PATTERN, description="Dark surface background", json_schema_extra={"example": "#0f172a"})
+    surface_light: str = Field(..., pattern=_HEX_COLOR_PATTERN, description="Light surface background", json_schema_extra={"example": "#1e293b"})
+    text:          str = Field(..., pattern=_HEX_COLOR_PATTERN, description="Primary text color", json_schema_extra={"example": "#f8fafc"})
+    text_muted:    str = Field(..., pattern=_HEX_COLOR_PATTERN, description="Muted text color", json_schema_extra={"example": "#cbd5e1"})
 
 
 class CustomThemeResponse(BaseModel):
-    key:        str = Field(..., example="my-theme", description="Stable URL-safe identifier")
-    name:       str = Field(..., example="My Theme", description="Human-readable display name")
+    key:        str = Field(..., description="Stable URL-safe identifier", json_schema_extra={"example": "my-theme"})
+    name:       str = Field(..., description="Human-readable display name", json_schema_extra={"example": "My Theme"})
     colors:     CustomThemeColors = Field(..., description="Color token values (hex)")
     created_by: Optional[str] = Field(None, description="UUID of the user that created the theme")
     created_at: Optional[str] = Field(None, description="ISO-8601 creation timestamp")
@@ -184,18 +185,18 @@ class CustomThemeListResponse(BaseModel):
 
 
 class CustomThemeCreateRequest(BaseModel):
-    name:   str = Field(..., min_length=1, max_length=64, example="My Theme", description="Display name")
+    name:   str = Field(..., min_length=1, max_length=64, description="Display name", json_schema_extra={"example": "My Theme"})
     colors: CustomThemeColors = Field(..., description="Color token payload (every token is required)")
 
 
 class CustomThemeUpdateRequest(BaseModel):
-    name:   Optional[str] = Field(None, min_length=1, max_length=64, example="My Theme", description="New display name")
+    name:   Optional[str] = Field(None, min_length=1, max_length=64, description="New display name", json_schema_extra={"example": "My Theme"})
     colors: Optional[CustomThemeColors] = Field(None, description="Replacement color token payload")
 
 
 class DefaultFormatMapping(BaseModel):
-    input_format: str = Field(..., example="png", description="Input file format")
-    output_format: str = Field(..., example="jpeg", description="Default output format")
+    input_format: str = Field(..., description="Input file format", json_schema_extra={"example": "png"})
+    output_format: str = Field(..., description="Default output format", json_schema_extra={"example": "jpeg"})
 
 
 class DefaultFormatListResponse(BaseModel):
@@ -204,8 +205,8 @@ class DefaultFormatListResponse(BaseModel):
 
 
 class DefaultQualityMapping(BaseModel):
-    output_format: str = Field(..., example="jpeg", description="Output file format")
-    quality: str = Field(..., example="high", description="Default quality level")
+    output_format: str = Field(..., description="Output file format", json_schema_extra={"example": "jpeg"})
+    quality: str = Field(..., description="Default quality level", json_schema_extra={"example": "high"})
 
 
 class DefaultQualityListResponse(BaseModel):
@@ -213,14 +214,14 @@ class DefaultQualityListResponse(BaseModel):
 
 
 class UserResponse(BaseModel):
-    uuid: str = Field(..., example="123e4567-e89b-12d3-a456-426614174000", description="Stable user UUID")
-    username: str = Field(..., example="alice", description="Unique account username")
-    email: Optional[str] = Field(None, example="alice@example.com", description="Optional email address")
-    full_name: Optional[str] = Field(None, example="Alice Example", description="Optional full name")
-    role: UserRoleValue = Field(..., example="member", description="Assigned role")
-    disabled: bool = Field(..., example=False, description="Whether the account is disabled")
-    is_guest: bool = Field(False, example=False, description="Whether this is a guest account")
-    has_usable_password: bool = Field(True, example=True, description="Whether the account has a local password (false for OIDC-only accounts)")
+    uuid: str = Field(..., description="Stable user UUID", json_schema_extra={"example": "123e4567-e89b-12d3-a456-426614174000"})
+    username: str = Field(..., description="Unique account username", json_schema_extra={"example": "alice"})
+    email: Optional[str] = Field(None, description="Optional email address", json_schema_extra={"example": "alice@example.com"})
+    full_name: Optional[str] = Field(None, description="Optional full name", json_schema_extra={"example": "Alice Example"})
+    role: UserRoleValue = Field(..., description="Assigned role", json_schema_extra={"example": "member"})
+    disabled: bool = Field(..., description="Whether the account is disabled", json_schema_extra={"example": False})
+    is_guest: bool = Field(False, description="Whether this is a guest account", json_schema_extra={"example": False})
+    has_usable_password: bool = Field(True, description="Whether the account has a local password (false for OIDC-only accounts)", json_schema_extra={"example": True})
 
 
 class UserListResponse(BaseModel):
@@ -228,53 +229,53 @@ class UserListResponse(BaseModel):
 
 
 class UserCreateRequest(BaseModel):
-    username: str = Field(..., min_length=1, example="alice", description="Unique account username")
-    email: Optional[str] = Field(None, example="alice@example.com", description="Optional email address")
-    full_name: Optional[str] = Field(None, example="Alice Example", description="Optional full name")
-    password: str = Field(..., min_length=8, example="correct horse battery staple", description="Plain-text password (min 8 characters)")
-    role: UserRoleValue = Field("member", example="member", description="Assigned role")
-    disabled: bool = Field(False, example=False, description="Whether the account starts disabled")
+    username: str = Field(..., min_length=1, description="Unique account username", json_schema_extra={"example": "alice"})
+    email: Optional[str] = Field(None, description="Optional email address", json_schema_extra={"example": "alice@example.com"})
+    full_name: Optional[str] = Field(None, description="Optional full name", json_schema_extra={"example": "Alice Example"})
+    password: str = Field(..., min_length=8, description="Plain-text password (min 8 characters)", json_schema_extra={"example": "correct horse battery staple"})
+    role: UserRoleValue = Field("member", description="Assigned role", json_schema_extra={"example": "member"})
+    disabled: bool = Field(False, description="Whether the account starts disabled", json_schema_extra={"example": False})
 
 
 class UserUpdateRequest(BaseModel):
-    username: Optional[str] = Field(None, min_length=1, example="alice", description="Unique account username")
-    email: Optional[str] = Field(None, example="alice@example.com", description="Optional email address")
-    full_name: Optional[str] = Field(None, example="Alice Example", description="Optional full name")
-    password: Optional[str] = Field(None, min_length=8, example="new secure password", description="New plain-text password (min 8 characters)")
-    role: Optional[UserRoleValue] = Field(None, example="admin", description="Assigned role")
-    disabled: Optional[bool] = Field(None, example=False, description="Whether the account is disabled")
+    username: Optional[str] = Field(None, min_length=1, description="Unique account username", json_schema_extra={"example": "alice"})
+    email: Optional[str] = Field(None, description="Optional email address", json_schema_extra={"example": "alice@example.com"})
+    full_name: Optional[str] = Field(None, description="Optional full name", json_schema_extra={"example": "Alice Example"})
+    password: Optional[str] = Field(None, min_length=8, description="New plain-text password (min 8 characters)", json_schema_extra={"example": "new secure password"})
+    role: Optional[UserRoleValue] = Field(None, description="Assigned role", json_schema_extra={"example": "admin"})
+    disabled: Optional[bool] = Field(None, description="Whether the account is disabled", json_schema_extra={"example": False})
 
 
 class UserAuthRequest(BaseModel):
-    username: str = Field(..., min_length=1, example="alice", description="Username to authenticate")
-    password: str = Field(..., min_length=1, example="correct horse battery staple", description="Plain-text password to verify")
+    username: str = Field(..., min_length=1, description="Username to authenticate", json_schema_extra={"example": "alice"})
+    password: str = Field(..., min_length=1, description="Plain-text password to verify", json_schema_extra={"example": "correct horse battery staple"})
 
 
 class UserAuthResponse(BaseModel):
-    access_token: str = Field(..., example="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...", description="Signed JWT access token")
-    token_type: str = Field(..., example="bearer", description="OAuth2 token type")
-    expires_in: int = Field(..., example=3600, description="Token lifetime in seconds")
+    access_token: str = Field(..., description="Signed JWT access token", json_schema_extra={"example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."})
+    token_type: str = Field(..., description="OAuth2 token type", json_schema_extra={"example": "bearer"})
+    expires_in: int = Field(..., description="Token lifetime in seconds", json_schema_extra={"example": 3600})
     user: UserResponse = Field(..., description="Authenticated user details")
 
 
 class UserDeleteResponse(BaseModel):
-    message: str = Field(..., example="User deleted successfully", description="Deletion status message")
+    message: str = Field(..., description="Deletion status message", json_schema_extra={"example": "User deleted successfully"})
 
 
 class UserBootstrapStatusResponse(BaseModel):
-    requires_setup: bool = Field(..., example=True, description="Whether the first admin account still needs to be created")
-    user_count: int = Field(..., example=0, description="Current number of users")
+    requires_setup: bool = Field(..., description="Whether the first admin account still needs to be created", json_schema_extra={"example": True})
+    user_count: int = Field(..., description="Current number of users", json_schema_extra={"example": 0})
 
 
 class UserSelfUpdateRequest(BaseModel):
-    username: Optional[str] = Field(None, min_length=1, example="alice", description="Unique account username")
-    email: Optional[str] = Field(None, example="alice@example.com", description="Optional email address")
-    full_name: Optional[str] = Field(None, example="Alice Example", description="Optional full name")
-    password: Optional[str] = Field(None, min_length=8, example="new secure password", description="New plain-text password (min 8 characters)")
+    username: Optional[str] = Field(None, min_length=1, description="Unique account username", json_schema_extra={"example": "alice"})
+    email: Optional[str] = Field(None, description="Optional email address", json_schema_extra={"example": "alice@example.com"})
+    full_name: Optional[str] = Field(None, description="Optional full name", json_schema_extra={"example": "Alice Example"})
+    password: Optional[str] = Field(None, min_length=8, description="New plain-text password (min 8 characters)", json_schema_extra={"example": "new secure password"})
 
 
 class ApiKeyCreateRequest(BaseModel):
-    name: str = Field(..., min_length=1, max_length=100, example="CI pipeline", description="Human-readable label for the key")
+    name: str = Field(..., min_length=1, max_length=100, description="Human-readable label for the key", json_schema_extra={"example": "CI pipeline"})
 
 
 class ApiKeyResponse(BaseModel):
@@ -298,15 +299,15 @@ class ApiKeyDeleteResponse(BaseModel):
 
 
 class UserStatsItem(BaseModel):
-    user_uuid: str = Field(..., example="123e4567-e89b-12d3-a456-426614174000", description="User UUID")
-    username: str = Field(..., example="alice", description="Username")
-    files_uploaded: int = Field(..., example=12, description="Number of files uploaded")
-    conversions: int = Field(..., example=8, description="Number of conversions performed")
-    storage_bytes: int = Field(..., example=10485760, description="Total storage used in bytes (uploads + conversions)")
+    user_uuid: str = Field(..., description="User UUID", json_schema_extra={"example": "123e4567-e89b-12d3-a456-426614174000"})
+    username: str = Field(..., description="Username", json_schema_extra={"example": "alice"})
+    files_uploaded: int = Field(..., description="Number of files uploaded", json_schema_extra={"example": 12})
+    conversions: int = Field(..., description="Number of conversions performed", json_schema_extra={"example": 8})
+    storage_bytes: int = Field(..., description="Total storage used in bytes (uploads + conversions)", json_schema_extra={"example": 10485760})
 
 
 class StatsResponse(BaseModel):
-    total_files_uploaded: int = Field(..., example=42, description="Total files uploaded across all users")
-    total_conversions: int = Field(..., example=30, description="Total conversions across all users")
-    total_storage_bytes: int = Field(..., example=104857600, description="Total storage used in bytes across all users")
+    total_files_uploaded: int = Field(..., description="Total files uploaded across all users", json_schema_extra={"example": 42})
+    total_conversions: int = Field(..., description="Total conversions across all users", json_schema_extra={"example": 30})
+    total_storage_bytes: int = Field(..., description="Total storage used in bytes across all users", json_schema_extra={"example": 104857600})
     users: list[UserStatsItem] = Field(..., description="Per-user breakdown of stats")
