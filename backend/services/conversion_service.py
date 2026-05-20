@@ -12,6 +12,7 @@ for the worker).
 """
 from __future__ import annotations
 
+import errno
 from pathlib import Path
 import shutil
 import uuid
@@ -55,6 +56,18 @@ def _copy_web_alias_to_base(
     output_path = temp_dir / f"{converted_id}.{output_format}"
     shutil.copy2(input_path, output_path)
     return [str(output_path)]
+
+
+def _move_output_file(source_path: Path, target_path: Path) -> Path:
+    """Persist a converter output even when temp/output dirs are separate mounts."""
+    try:
+        return source_path.rename(target_path)
+    except OSError as exc:
+        if exc.errno != errno.EXDEV:
+            raise
+
+    shutil.move(str(source_path), str(target_path))
+    return target_path
 
 
 def run_conversion_job(
@@ -134,8 +147,9 @@ def run_conversion_job(
         raise ConversionFailedError("Converter produced no output files")
 
     if len(output_files) == 1:
-        moved_output_file = Path(output_files[0]).rename(
-            f"{converted_dir}/{converted_id}{output_extension}"
+        moved_output_file = _move_output_file(
+            Path(output_files[0]),
+            Path(f"{converted_dir}/{converted_id}{output_extension}"),
         )
         final_media_type = output_format
         final_extension = output_extension

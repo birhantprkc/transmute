@@ -6,6 +6,7 @@ of the pipeline keeps a one-record-per-conversion contract.
 """
 from __future__ import annotations
 
+import errno
 from pathlib import Path
 from unittest.mock import MagicMock
 from uuid import uuid4
@@ -88,6 +89,40 @@ def test_single_output_keeps_format_and_extension(safe_path_test_settings, fake_
     assert out_path.exists()
     assert out_path.suffix == ".png"
     assert out_path.read_bytes() == b"\x89PNG-1"
+
+
+def test_single_output_falls_back_when_rename_crosses_devices(
+    safe_path_test_settings, fake_dbs, monkeypatch
+):
+    file_db, conversion_db, conversion_relations_db, settings_db = fake_dbs
+    src_meta = _source_metadata(safe_path_test_settings.upload_dir)
+    converter_cls = _make_converter([("page-001.png", b"\x89PNG-1")])
+    original_rename = Path.rename
+
+    def fake_rename(self, target):
+        if self.parent == safe_path_test_settings.tmp_dir:
+            raise OSError(errno.EXDEV, "Invalid cross-device link")
+        return original_rename(self, target)
+
+    monkeypatch.setattr(Path, "rename", fake_rename)
+
+    result = conversion_service.run_conversion_job(
+        source_metadata=src_meta,
+        output_format="png",
+        quality=None,
+        converter_type=converter_cls,
+        user_id="user-a",
+        file_db=file_db,
+        conversion_db=conversion_db,
+        conversion_relations_db=conversion_relations_db,
+        settings_db=settings_db,
+    )
+
+    out_path = Path(result["storage_path"])
+    assert out_path.exists()
+    assert out_path.suffix == ".png"
+    assert out_path.read_bytes() == b"\x89PNG-1"
+    assert not (safe_path_test_settings.tmp_dir / "page-001.png").exists()
 
 
 def test_multi_output_is_packaged_as_zip(safe_path_test_settings, fake_dbs):
