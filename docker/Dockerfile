@@ -97,14 +97,14 @@ RUN ARCH="${TARGETARCH:-$(dpkg --print-architecture)}" && \
     rm /tmp/drawio.deb && \
     rm -rf /var/lib/apt/lists/*
 
-# Install Calibre from upstream GitHub releases to avoid stale distro packages.
+# Install Calibre from official download site to avoid stale distro packages.
 RUN ARCH="${TARGETARCH:-$(dpkg --print-architecture)}" && \
     case "$ARCH" in \
       amd64) CALIBRE_ARCH="x86_64" ;; \
       arm64) CALIBRE_ARCH="arm64" ;; \
       *) echo "Unsupported architecture for calibre: $ARCH" >&2; exit 1 ;; \
     esac && \
-    CALIBRE_URL="https://github.com/kovidgoyal/calibre/releases/download/v${CALIBRE_VERSION}/calibre-${CALIBRE_VERSION}-${CALIBRE_ARCH}.txz" && \
+    CALIBRE_URL="https://download.calibre-ebook.com/${CALIBRE_VERSION}/calibre-${CALIBRE_VERSION}-${CALIBRE_ARCH}.txz" && \
     wget --tries=3 --waitretry=5 --retry-connrefused \
          "$CALIBRE_URL" -O /tmp/calibre.txz && \
     mkdir -p /opt/calibre && \
