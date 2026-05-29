@@ -2,8 +2,8 @@
   "@context": "https://openvex.dev/ns/v0.2.0",
   "@id": "https://github.com/transmute-app/transmute/blob/main/docs/other/vex.json",
   "author": "transmute-app",
-  "timestamp": "2026-03-24T00:00:00Z",
-  "version": 1,
+  "timestamp": "2026-05-28T00:00:00Z",
+  "version": 3,
   "statements": [
     {
       "vulnerability": { 
@@ -22,6 +22,55 @@
       "status": "not_affected",
       "justification": "vulnerable_code_not_in_execute_path",
       "impact_statement": "Transmute does not use progs/infocmp.c, function analyze_string(), which is the vulnerable code path. The vulnerable code is not in the execute path of Transmute, and cannot be reached by an attacker."
+    },
+    {
+      "vulnerability": {
+        "@id": "CVE-2026-42497"
+      },
+      "products": [
+        {
+          "@id": "pkg:docker/transmute-app/transmute?repository_url=ghcr.io",
+          "subcomponents": [
+            {
+              "@id": "pkg:deb/debian/perl-modules-5.40@5.40.1-6?os_distro=trixie\u0026os_name=debian\u0026os_version=13"
+            }
+          ]
+        }
+      ],
+      "status": "not_affected",
+      "justification": "vulnerable_code_not_in_execute_path",
+      "impact_statement": "Transmute does not use Perl Archive::Tar to extract untrusted tar archives. Its tar extraction path is implemented in Python via backend/converters/archive_convert.py and uses tarfile.extractall(path=dest, filter='data'), which rejects symlinks and hardlinks that escape the extraction directory. The vulnerable Archive::Tar hardlink extraction code path is not in the execute path of Transmute and cannot be reached by an attacker through the application."
+    },
+    {
+      "vulnerability": {
+        "@id": "CVE-2026-42496"
+      },
+      "products": [
+        {
+          "@id": "pkg:docker/transmute-app/transmute?repository_url=ghcr.io",
+          "subcomponents": [
+            {
+              "@id": "pkg:deb/debian/perl-modules-5.40@5.40.1-6?os_distro=trixie\u0026os_name=debian\u0026os_version=13"
+            }
+          ]
+        }
+      ],
+      "status": "not_affected",
+      "justification": "vulnerable_code_not_in_execute_path",
+      "impact_statement": "Transmute does not use Perl Archive::Tar to extract untrusted tar archives. Its tar extraction path is implemented in Python via backend/converters/archive_convert.py and uses tarfile.extractall(path=dest, filter='data'), which rejects symlinks and hardlinks that escape the extraction directory. The vulnerable Archive::Tar symlink extraction code path is not in the execute path of Transmute and cannot be reached by an attacker through the application."
+    },
+    {
+      "vulnerability": {
+        "@id": "CVE-2026-48962"
+      },
+      "products": [
+        {
+          "@id": "pkg:docker/transmute-app/transmute?repository_url=ghcr.io"
+        }
+      ],
+      "status": "not_affected",
+      "justification": "component_not_present",
+      "impact_statement": "Transmute does not include the vulnerable Perl IO::Compress component in its container image, and the application does not use Perl File::GlobMapper or attacker-controlled output globs. Inspection of the built image shows no installed IO::Compress module in Perl's @INC and no Debian IO::Compress package such as libio-compress-perl in the package inventory, so the vulnerable component is not present in the product."
     }
   ]
 }
