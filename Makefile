@@ -93,7 +93,9 @@ check: lint ## Run all checks (alias for lint)
 test: test-backend test-frontend
 
 test-backend: ## Run Python backend tests with pytest
-	$(PYTHON) -m pytest backend --ignore=backend/tests/converters/test_all_conversions.py
+	$(PYTHON) -m pytest backend \
+		--ignore=backend/tests/converters/test_all_conversions.py \
+		--ignore=backend/tests/compressors/test_all_compressions.py
 
 test-frontend: ## Run frontend tests with Vitest. Still working on develop tests
 	cd frontend && npm run test
@@ -102,6 +104,9 @@ test-frontend: ## Run frontend tests with Vitest. Still working on develop tests
 # Can re-enable once we have a better test PDF
 test-conversions: ## Run all conversion tests (currently skipped in CI)
 	$(PYTHON) -m pytest backend/tests/converters/test_all_conversions.py -k "not pdf->cbz"
+
+test-compressions: ## Run all compression tests (currently skipped in CI)
+	$(PYTHON) -m pytest backend/tests/compressors/test_all_compressions.py
 
 # ----------------------------------------------------------------------------
 # Docker

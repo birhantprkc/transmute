@@ -83,6 +83,15 @@ class ConverterMetadata(BaseModel):
 class ConverterMetadataListResponse(BaseModel):
     converters: list[ConverterMetadata] = Field(..., description="List of the available converters")
 
+class CompressorMetadata(BaseModel):
+    name: str = Field(..., json_schema_extra={"example": "image_compress"})
+    supported_formats: list[str] = Field(..., description="Media formats this compressor can compress (input == output)", json_schema_extra={"example": ["jpeg", "png"]})
+    formats_with_compression_levels: list[str] = Field(..., description="Subset of supported formats that honor a compression-level preset", json_schema_extra={"example": ["jpeg"]})
+    compression_levels: list[str] = Field(..., description="Available compression-level presets", json_schema_extra={"example": ["light", "balanced", "max"]})
+
+class CompressorMetadataListResponse(BaseModel):
+    compressors: list[CompressorMetadata] = Field(..., description="List of the available compressors")
+
 class ErrorResponse(BaseModel):
     detail: str = Field(..., description="Error message", json_schema_extra={"example": "No converter found for jpg to png"})
 
@@ -215,6 +224,68 @@ class DefaultQualityListResponse(BaseModel):
     defaults: list[DefaultQualityMapping] = Field(..., description="List of default quality mappings")
 
 
+class CompressionRequest(BaseModel):
+    id: str = Field(..., description="ID of file to compress", json_schema_extra={"example": "123e4567-e89b-12d3-a456-426614174000"})
+    compression_level: Optional[str] = Field(None, description="Optional compression-level preset (e.g. light, balanced, max)", json_schema_extra={"example": "balanced"})
+
+
+CompressionJobStatus = Literal["queued", "running", "completed", "failed", "cancelled"]
+
+
+class CompressionJobCreateRequest(BaseModel):
+    id: str = Field(..., description="ID of the source file to compress", json_schema_extra={"example": "123e4567-e89b-12d3-a456-426614174000"})
+    compression_level: Optional[str] = Field(None, description="Optional compression-level preset (e.g. light, balanced, max)", json_schema_extra={"example": "balanced"})
+
+
+class CompressionJobResponse(BaseModel):
+    id: str = Field(..., description="Job UUID")
+    user_id: str = Field(..., description="Owning user UUID")
+    source_file_id: str = Field(..., description="Source file ID being compressed")
+    compression_level: Optional[str] = Field(None, description="Compression-level preset used, if any")
+    status: CompressionJobStatus = Field(..., description="Current job status")
+    progress: Optional[int] = Field(None, description="0-100 progress hint when available")
+    error_message: Optional[str] = Field(None, description="Error message when status is failed")
+    output_file_id: Optional[str] = Field(None, description="ID of the resulting compressed file when completed")
+    compressor_name: Optional[str] = Field(None, description="Compressor implementation that handled (or will handle) the job")
+    source_filename: Optional[str] = Field(None, description="Denormalized source filename at submit time")
+    source_media_type: Optional[str] = Field(None, description="Denormalized source media type at submit time")
+    source_extension: Optional[str] = Field(None, description="Denormalized source extension at submit time")
+    source_size_bytes: Optional[int] = Field(None, description="Denormalized source size at submit time")
+    created_at: Optional[str] = Field(None, description="Creation timestamp")
+    started_at: Optional[str] = Field(None, description="Time the worker began processing")
+    completed_at: Optional[str] = Field(None, description="Time the job reached a terminal status")
+    updated_at: Optional[str] = Field(None, description="Last update timestamp")
+
+
+class CompressionJobListResponse(BaseModel):
+    jobs: list[CompressionJobResponse] = Field(..., description="List of compression jobs for the current user")
+
+
+class CompressionItem(BaseModel):
+    id: str = Field(..., json_schema_extra={"example": "123e4567-e89b-12d3-a456-426614174000"})
+    original_filename: str = Field(..., json_schema_extra={"example": "example.jpg"})
+    media_type: str = Field(..., json_schema_extra={"example": "jpg"})
+    extension: str = Field(..., json_schema_extra={"example": ".jpg"})
+    size_bytes: int = Field(..., json_schema_extra={"example": 102400})
+    sha256_checksum: str = Field(..., json_schema_extra={"example": "abc123def456..."})
+    compression_level: Optional[str] = Field(None, description="Compression-level preset used for this compression", json_schema_extra={"example": "balanced"})
+    original_file: Optional[FileMetadata] = Field(None, description="Original file metadata")
+
+
+class CompressionListResponse(BaseModel):
+    compressions: list[CompressionItem] = Field(..., description="List of completed compressions")
+
+
+class DefaultCompressionLevelMapping(BaseModel):
+    media_format: str = Field(..., description="Media file format", json_schema_extra={"example": "jpeg"})
+    compression_level: str = Field(..., description="Default compression-level preset", json_schema_extra={"example": "max"})
+
+
+class DefaultCompressionLevelListResponse(BaseModel):
+    defaults: list[DefaultCompressionLevelMapping] = Field(..., description="List of default compression-level mappings")
+
+
+
 class UserResponse(BaseModel):
     uuid: str = Field(..., description="Stable user UUID", json_schema_extra={"example": "123e4567-e89b-12d3-a456-426614174000"})
     username: str = Field(..., description="Unique account username", json_schema_extra={"example": "alice"})
@@ -304,12 +375,12 @@ class UserStatsItem(BaseModel):
     user_uuid: str = Field(..., description="User UUID", json_schema_extra={"example": "123e4567-e89b-12d3-a456-426614174000"})
     username: str = Field(..., description="Username", json_schema_extra={"example": "alice"})
     files_uploaded: int = Field(..., description="Number of files uploaded", json_schema_extra={"example": 12})
-    conversions: int = Field(..., description="Number of conversions performed", json_schema_extra={"example": 8})
-    storage_bytes: int = Field(..., description="Total storage used in bytes (uploads + conversions)", json_schema_extra={"example": 10485760})
+    output_files: int = Field(..., description="Number of output files produced (conversions + compressions)", json_schema_extra={"example": 8})
+    storage_bytes: int = Field(..., description="Total storage used in bytes (uploads + conversions + compressions)", json_schema_extra={"example": 10485760})
 
 
 class StatsResponse(BaseModel):
     total_files_uploaded: int = Field(..., description="Total files uploaded across all users", json_schema_extra={"example": 42})
-    total_conversions: int = Field(..., description="Total conversions across all users", json_schema_extra={"example": 30})
+    total_output_files: int = Field(..., description="Total output files produced across all users (conversions + compressions)", json_schema_extra={"example": 30})
     total_storage_bytes: int = Field(..., description="Total storage used in bytes across all users", json_schema_extra={"example": 104857600})
     users: list[UserStatsItem] = Field(..., description="Per-user breakdown of stats")
