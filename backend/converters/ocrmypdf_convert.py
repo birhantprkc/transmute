@@ -8,6 +8,7 @@ import ocrmypdf
 
 from .converter_interface import ConverterInterface
 from core import media_type_extensions
+from core.settings import get_settings
 
 
 class OCRmyPDFConverter(ConverterInterface):
@@ -92,6 +93,8 @@ class OCRmyPDFConverter(ConverterInterface):
         pdfminer_logger.setLevel(logging.ERROR)
         pdfminer_logger.propagate = False
 
+        invalidate_signatures = get_settings().invalidate_pdf_digital_signatures
+
         try:
             ocrmypdf.ocr(
                 self.input_file,
@@ -99,6 +102,7 @@ class OCRmyPDFConverter(ConverterInterface):
                 output_type="pdfa",
                 skip_text=True,
                 progress_bar=False,
+                invalidate_digital_signatures=invalidate_signatures,
             )
         except ocrmypdf.exceptions.PriorOcrFoundError:
             ocrmypdf.ocr(
@@ -107,8 +111,16 @@ class OCRmyPDFConverter(ConverterInterface):
                 output_type="pdfa",
                 force_ocr=True,
                 progress_bar=False,
+                invalidate_digital_signatures=invalidate_signatures,
             )
-        except ocrmypdf.exceptions.OcrmypdfError as exc:
+        except ocrmypdf.exceptions.DigitalSignatureError as exc:
+            raise RuntimeError(
+                "This PDF is digitally signed and cannot be converted to PDF/A "
+                "without invalidating its signature. Set "
+                "INVALIDATE_PDF_DIGITAL_SIGNATURES=true to allow the signature to "
+                "be stripped during conversion."
+            ) from exc
+        except ocrmypdf.exceptions.ExitCodeException as exc:
             raise RuntimeError(f"ocrmypdf conversion failed: {exc}") from exc
 
         if not os.path.exists(output_file):

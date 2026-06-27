@@ -62,6 +62,12 @@ class Settings(BaseSettings):
     # Number of background worker threads for the compression queue.
     compression_worker_concurrency: int = 5
 
+    # ===== PDF conversion =====
+    # When converting PDF -> PDF/A, digitally signed PDFs cannot be processed
+    # without invalidating their signatures. If True, allow ocrmypdf to strip
+    # (invalidate) digital signatures so the conversion can proceed.
+    invalidate_pdf_digital_signatures: bool = False
+
     # ===== Authentication =====
     auth_secret_key: str = ""
     auth_algorithm: str = "HS256"
