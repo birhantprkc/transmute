@@ -82,6 +82,26 @@ _FLAC_COMPRESSION_BY_LEVEL: dict[str, int] = {
 }
 _DEFAULT_FLAC_COMPRESSION = _FLAC_COMPRESSION_BY_LEVEL['balanced']
 
+# Animated GIF is re-encoded with a freshly generated palette so the animation
+# (all frames + timing) is preserved. Size is controlled by the palette color
+# count and the dithering method. Fewer colors and ordered (Bayer) dithering
+# yield smaller files; error-diffusion (sierra2_4a) preserves the most detail.
+_GIF_MAX_COLORS_BY_LEVEL: dict[str, int] = {
+    'light': 256,
+    'balanced': 128,
+    'max': 64,
+}
+_DEFAULT_GIF_MAX_COLORS = _GIF_MAX_COLORS_BY_LEVEL['balanced']
+
+# Bayer dither scale (1-5, higher = smaller / more banding). ``None`` selects
+# error-diffusion (sierra2_4a) for the best quality at the ``light`` preset.
+_GIF_BAYER_SCALE_BY_LEVEL: dict[str, Optional[int]] = {
+    'light': None,
+    'balanced': 3,
+    'max': 5,
+}
+_DEFAULT_GIF_BAYER_SCALE = _GIF_BAYER_SCALE_BY_LEVEL['balanced']
+
 
 class FFmpegCompressor(CompressorInterface):
     """Same-format audio/video compressor backed by FFmpeg.
@@ -135,7 +155,12 @@ class FFmpegCompressor(CompressorInterface):
 
     video_formats: set = _h264_video_formats | _vp9_video_formats | _qscale_video_formats
 
-    supported_formats: set = video_formats | audio_formats
+    # Animated GIF re-encoded with a generated palette (split/palettegen/
+    # paletteuse) so the animation is preserved rather than flattened to a
+    # single still frame.
+    _gif_formats: set = {'gif'}
+
+    supported_formats: set = video_formats | audio_formats | _gif_formats
     formats_with_compression_levels: set = supported_formats
 
     ffmpeg_paths = {
@@ -340,6 +365,30 @@ class FFmpegCompressor(CompressorInterface):
                 '-c:a', 'libopus',
                 '-b:a', audio_bitrate,
             ])
+            return args
+
+        if fmt in self._gif_formats:
+            # Re-encode the animated GIF with a generated palette in a single
+            # pass: ``split`` feeds the stream to ``palettegen`` (which scans all
+            # frames to build an optimal palette) and to ``paletteuse`` (which
+            # maps every frame onto that palette). This keeps the animation
+            # intact while shrinking the file via fewer colors / coarser dither.
+            max_colors = _GIF_MAX_COLORS_BY_LEVEL.get(
+                compression_level, _DEFAULT_GIF_MAX_COLORS
+            )
+            bayer_scale = _GIF_BAYER_SCALE_BY_LEVEL.get(
+                compression_level, _DEFAULT_GIF_BAYER_SCALE
+            )
+            if bayer_scale is None:
+                paletteuse = 'paletteuse=dither=sierra2_4a'
+            else:
+                paletteuse = f'paletteuse=dither=bayer:bayer_scale={bayer_scale}'
+            filtergraph = (
+                f'split[a][b];'
+                f'[a]palettegen=max_colors={max_colors}[p];'
+                f'[b][p]{paletteuse}'
+            )
+            args.extend(['-filter_complex', filtergraph])
             return args
 
         # MPEG-family containers: re-encode with the container default codecs

@@ -61,7 +61,6 @@ class PillowCompressor(CompressorInterface):
         'heif',
         'heic',
         'tiff',
-        'gif',
     }
     formats_with_compression_levels: set = {
         'jpeg',
@@ -191,8 +190,5 @@ class PillowCompressor(CompressorInterface):
             kwargs['compression'] = _TIFF_COMPRESSION_BY_LEVEL.get(
                 level, _DEFAULT_TIFF_COMPRESSION
             )
-        elif fmt == 'gif':
-            # GIF uses palette + LZW; ``optimize`` strips redundant palette entries.
-            kwargs['optimize'] = True
 
         return kwargs
